@@ -63,70 +63,52 @@
   </div>
 
   <script>
-  function runFCFS() {
+    const params = new URLSearchParams(window.location.search);
+    const category = params.get("category");
+    const selectionArea = document.getElementById("selectionArea");
 
-    const headInput = document.getElementById("head").value.trim();
-    const requestInput = document.getElementById("requests").value.trim();
-    const output = document.getElementById("output");
-
-    // Validate head position
-    if (headInput === "") {
-      output.innerText = "Please enter the head position.";
-      return;
+    function createDropdown(label, options) {
+      const html = `
+        <p>${label}</p>
+        <select id="algoSelect" required>
+          <option value="" disabled selected>Select...</option>
+          ${options.map(opt => `<option value="${opt.link}">${opt.name}</option>`).join("")}
+        </select>
+        <button onclick="goToAlgorithm()">Go</button>
+      `;
+      selectionArea.innerHTML = html;
     }
 
-    const head = Number(headInput);
-
-    if (!Number.isInteger(head) || head < 0) {
-      output.innerText = "Head position must be a non-negative integer.";
-      return;
-    }
-
-    // Validate request queue
-    if (requestInput === "") {
-      output.innerText = "Please enter the request queue.";
-      return;
-    }
-
-    const requests = requestInput
-      .split(",")
-      .map(value => value.trim());
-
-    // Check every request
-    for (let value of requests) {
-      if (value === "" || !Number.isInteger(Number(value)) || Number(value) < 0) {
-        output.innerText =
-          "Invalid request queue. Enter non-negative integers separated by commas.";
-        return;
+    function goToAlgorithm() {
+      const selected = document.getElementById("algoSelect").value;
+      if (selected) {
+        window.location.href = selected;
       }
     }
 
-    const requestQueue = requests.map(Number);
-
-    // FCFS calculation
-    let totalSeek = 0;
-    let current = head;
-    let sequence = [head];
-
-    for (let request of requestQueue) {
-
-      const seekDistance = Math.abs(current - request);
-
-      totalSeek += seekDistance;
-
-      sequence.push(request);
-
-      current = request;
+    if (category === "disk") {
+      createDropdown("Choose Disk Scheduling Algorithm:", [
+        { name: "FCFS", link: "fcfs.html" },
+        { name: "SSTF", link: "sstf.html" },
+        { name: "SCAN", link: "scan.html" },
+        { name: "LOOK", link: "look.html" },
+        { name: "C-SCAN", link: "cscan.html" },
+        { name: "C-LOOK", link: "clook.html" }
+      ]);
+    } else if (category === "page") {
+      createDropdown("Choose Page Replacement Algorithm:", [
+        { name: "FIFO", link: "fifo.html" },
+        { name: "LRU", link: "lru.html" },
+        { name: "Optimal", link: "optimal.html" }
+      ]);
+    } else if (category === "banker") {
+      selectionArea.innerHTML = `
+        <p>Banker's Algorithm Selected</p>
+        <button onclick="window.location.href='banker.html'">Go to Banker's Algorithm</button>
+      `;
+    } else {
+      selectionArea.innerHTML = `<p style="color: red;">Invalid selection.</p>`;
     }
-
-    // Display result
-    const averageSeek = totalSeek / requestQueue.length;
-
-    output.innerText =
-      "Seek Sequence: " + sequence.join(" → ") + "\n" +
-      "Total Seek Time: " + totalSeek + "\n" +
-      "Average Seek Time: " + averageSeek.toFixed(2);
-  }
-</script>
+  </script>
 </body>
 </html>
